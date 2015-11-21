@@ -418,6 +418,106 @@ upgrade.
   every Sunday early morning.  See `/etc/cron.d/restart-zulip` for the
   precise configuration.
 
+### Backups for Zulip
+
+There are several pieces of data that you might want to back up:
+
+* The postgres database.  That you can back up like any postgres
+database; we have some example tooling for doing that incrementally
+into S3 using [wal-e](https://github.com/wal-e/wal-e) in
+`puppet/zulip_internal/manifests/postgres_common.pp` (that's what we
+use for zulip.com's database backups).  Note that this module isn't
+part of the Zulip server releases since it's part of the zulip.com
+configuration (see https://github.com/zulip/zulip/issues/293 for a
+ticket about fixing this to make life easier for running backups).
+
+* Any user-uploaded files.  If you're using S3 as storage for file
+uploads, this is backed up in S3, but if you have instead set
+LOCAL_UPLOADS_DIR, any files uploaded by users (including avatars)
+will be stored in that directory and you'll want to back it up.
+
+* Your Zulip configuration including secrets from /etc/zulip/.
+E.g. if you lose the value of secret_key, all users will need to login
+again when you setup a replacement server since you won't be able to
+verify their cookies; if you lose avatar_salt, any user-uploaded
+avatars will need to be re-uploaded (since avatar filenames are
+computed using a hash of avatar_salt and user's email), etc.
+
+* The logs under /var/log/zulip can be handy to have backed up, but
+they do get large on a busy server, and it's definitely
+lower-priority.
+
+### Restoration
+
+To restore from backups, the process is basically the reverse of the above:
+
+* Install new server as normal by downloading a Zulip release tarball
+  and then using `scripts/setup/install`, you don't need
+  to run the `initialize-database` second stage which puts default
+  data into the database.
+
+* Unpack to /etc/zulip the settings.py and secrets.conf files from your backups.
+
+* Restore your database from the backup using wal-e; if you ran
+  `initialize-database` anyway above, you'll want to first
+  `scripts/setup/postgres-init-db` to drop the initial database first.
+
+* If you're using local file uploads, restore those files to the path
+  specified by `settings.LOCAL_UPLOADS_DIR` and (if appropriate) any
+  logs.
+
+* Start the server using scripts/restart-server
+
+This restoration process can also be used to migrate a Zulip
+installation from one server to another.
+
+We recommend running a disaster recovery after you setup backups to
+confirm that your backups are working; you may also want to monitor
+that they are up to date using the Nagios plugin at:
+`puppet/zulip_internal/files/nagios_plugins/check_postgres_backup`.
+
+Contributions to make this section of the guide much more explicit and
+detailed are very welcome!
+
+### Postgres streaming replication
+
+Zulip has database configuration for doing with Postgres streaming
+replication ; you can see the configuration in these files:
+
+* puppet/zulip_internal/manifests/postgres_slave.pp
+* puppet/zulip_internal/manifests/postgres_master.pp
+* puppet/zulip_internal/files/postgresql/*
+
+Contribution of a step-by-step guide for setting this up (and moving
+this configuration to be available in the main `puppet/zulip/` tree)
+
+### Using a remote postgres host
+
+This is a bit annoying to setup, but you can configure Zulip to use a
+dedicated postgres server by setting the `REMOTE_POSTGRES_HOST`
+variable in /etc/zulip/settings.py, and configuring Postgres
+certificate authentication (see
+http://www.postgresql.org/docs/9.1/static/ssl-tcp.html and
+http://www.postgresql.org/docs/9.1/static/libpq-ssl.html for
+documentation on how to set this up and deploy the certificates) to
+make the DATABASES configuration in `zproject/settings.py` work (or
+override that configuration).
+
+### Monitoring Zulip
+
+The complete Nagios configuration (sans secret keys) we used to
+monitor zulip.com is available under `puppet/zulip_internal` in the
+Zulip Git repository (those files are not installed in the release
+tarballs); there are a number of useful Nagios plugins available
+there, including:
+
+* check_fts_update_log (monitors for whether full-text search is up-to-date)
+* check_email_deliverer_backlog and check_email_deliverer_process (monitors )
+* check_pg_replication_lag
+* check_postgres_backup (checks backups are up to date; see above)
+* check_rabbitmq_consumers and check_rabbitmq_queues (checks for
+  rabbitmq being down or backlogged)
+* check_send_receive_time (sends a test message through the system to 
 
 Remote User SSO Authentication
 ==============================
