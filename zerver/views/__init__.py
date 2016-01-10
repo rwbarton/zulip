@@ -65,6 +65,7 @@ import logging
 import jwt
 import hashlib
 import hmac
+import random
 
 from zerver.lib.rest import rest_dispatch as _rest_dispatch
 rest_dispatch = csrf_exempt((lambda request, *args, **kwargs: _rest_dispatch(request, globals(), *args, **kwargs)))
@@ -659,6 +660,12 @@ def accounts_home(request):
                               {'form': form, 'current_url': request.get_full_path},
                               context_instance=RequestContext(request))
 
+def pick_json_server():
+    if settings.JSON_SERVER_FORMAT is not None:
+        return settings.JSON_SERVER_FORMAT % (random.randint(*settings.JSON_SERVER_RANGE),)
+    else:
+        return ''               # Local request
+
 def approximate_unread_count(user_profile):
     not_in_home_view_recipients = [sub.recipient.id for sub in \
                                        Subscription.objects.filter(
@@ -771,6 +778,7 @@ def home(request):
         poll_timeout          = settings.POLL_TIMEOUT,
         login_page            = settings.HOME_NOT_LOGGED_IN,
         maxfilesize           = settings.MAX_FILE_UPLOAD_SIZE,
+        json_server           = pick_json_server(),
         password_auth_enabled = password_auth_enabled(user_profile.realm),
         have_initial_messages = user_has_messages,
         subbed_info           = register_ret['subscriptions'],

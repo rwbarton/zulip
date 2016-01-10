@@ -102,6 +102,16 @@ ENABLE_FEEDBACK = False
 # be sent to that email address.
 FEEDBACK_EMAIL = ZULIP_ADMINISTRATOR
 
+# JSON request load balancing. Set a range of hostnames for your Zulip
+# server(s) here. You'll also need to ensure that Zulip's cookies are
+# available to these hostnames by adding a section to zulip.conf like
+#
+# [django]
+# cookie_domain = zulip.example.com
+
+#JSON_SERVER_FORMAT='e%d.zulip.example.com'
+#JSON_SERVER_RANGE=(1,99)
+
 # Controls whether or not error reports are sent to Zulip.  Error
 # reports are used to improve the quality of the product and do not
 # include message contents; please contact Zulip support with any

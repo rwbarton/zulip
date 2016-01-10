@@ -262,7 +262,8 @@ function get_events(options) {
     }
     get_events_timeout = undefined;
     get_events_xhr = channel.post({
-        url:      '/json/get_events',
+        url:      page_params.json_server + '/json/get_events',
+        withZulipCredentials: true,
         data:     get_events_params,
         idempotent: true,
         timeout:  page_params.poll_timeout,

@@ -152,6 +152,7 @@ DEFAULT_SETTINGS = {'TWITTER_CONSUMER_KEY': '',
                     'REMOTE_POSTGRES_HOST': '',
                     'GOOGLE_CLIENT_ID': '',
                     'DBX_APNS_CERT_FILE': None,
+                    'JSON_SERVER_FORMAT': None,
                     }
 
 for setting_name, setting_val in DEFAULT_SETTINGS.iteritems():

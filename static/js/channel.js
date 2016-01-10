@@ -22,6 +22,14 @@ function remove_pending_request (jqXHR) {
     }
 }
 
+// Copied from setup.js
+// TODO(rwbarton): Would it make more sense to handle all CSRF token
+// setting this way?
+var csrf_token;
+$(function () {
+    csrf_token = $('input[name="csrfmiddlewaretoken"]').attr('value');
+});
+
 function call(args, idempotent) {
     // Wrap the error handlers to reload the page if we get a CSRF error
     // (What probably happened is that the user logged out in another tab).
@@ -67,6 +75,14 @@ function call(args, idempotent) {
         }
         return orig_success(data, textStatus, jqXHR);
     };
+
+    if (args.withZulipCredentials) {
+        // See Note [JSON load balancing and CORS].
+        // Tell the browser to send cookies on this request...
+        args.xhrFields = {withCredentials: true};
+        // ... and include our CSRF token.
+        args.data.csrfmiddlewaretoken = csrf_token;
+    }
 
     var jqXHR = $.ajax(args);
     add_pending_request(jqXHR);
