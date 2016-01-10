@@ -32,6 +32,7 @@ def json_response(res_type="success", msg="", data={}, status=200):
     # See Note [JSON load balancing and CORS]
     resp['Access-Control-Allow-Origin'] = settings.EXTERNAL_URI_SCHEME + \
                                           settings.EXTERNAL_HOST
+    resp['Access-Control-Allow-Credentials'] = 'true'
     return resp
 
 def json_success(data={}):
@@ -74,9 +75,10 @@ def json_unhandled_exception():
 #    custom header requires an extra OPTIONS request, so we send it in
 #    the request body instead.
 #
-#  * We need to set the Access-Control-Allow-Origin header in our JSON
-#    responses, or the browser will not make the response available to
-#    the web client.
+#  * We need to set the Access-Control-Allow-Origin and
+#    Access-Control-Allow-Credentials headers in our JSON responses,
+#    or the browser will not make the response available to the web
+#    client.
 #
 # For more information on CORS, see
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials
