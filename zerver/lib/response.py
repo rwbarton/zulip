@@ -25,6 +25,11 @@ def json_method_not_allowed(methods):
     return resp
 
 def json_response(res_type="success", msg="", data={}, status=200):
+    # Note: This function is also used by the Tornado server.
+    # Any custom HTTP headers set here will likely also need
+    # to be copied to the Tornado response. See zulip_finish in
+    # zerver/management/commands/runtornado.py
+
     content = {"result": res_type, "msg": msg}
     content.update(data)
     resp = HttpResponse(content=ujson.dumps(content) + "\n",

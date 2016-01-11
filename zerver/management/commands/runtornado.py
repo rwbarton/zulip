@@ -345,12 +345,16 @@ class AsyncDjangoHandler(tornado.web.RequestHandler, base.BaseHandler):
         # e.g. our own logging code can run; but don't actually use
         # the headers from that since sending those to Tornado seems
         # tricky; instead just send the (already json-rendered)
-        # content on to Tornado
+        # content on to Tornado, along with some custom headers
         django_response = json_response(res_type=response['result'],
                                         data=response, status=self.get_status())
         django_response = self.apply_response_middleware(request, django_response,
                                                          request._resolver)
         # Pass through the content-type from Django, as json content should be
-        # served as application/json
-        self.set_header("Content-Type", django_response['Content-Type'])
+        # served as application/json. Also pass on CORS headers if present
+        # (see Note [JSON load balancing and CORS]).
+        for header in ['Content-Type', 'Access-Control-Allow-Origin',
+                       'Access-Control-Allow-Credentials']:
+            if header in django_response:
+                self.set_header(header, django_response[header])
         return self.finish(django_response.content)
