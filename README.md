@@ -18,10 +18,12 @@ missed-message emails, desktop apps, and much more.
 Further information on the Zulip project and its features can be found
 at https://www.zulip.org.
 
-[![Build Status][1]][2]
+[![Build Status][1]][2] [![Coverage Status][3]][4]
 
 [1]: https://travis-ci.org/zulip/zulip.svg?branch=master
 [2]: https://travis-ci.org/zulip/zulip
+[3]: https://coveralls.io/repos/github/rwbarton/zulip/badge.svg?branch=coveralls
+[4]: https://coveralls.io/github/rwbarton/zulip?branch=coveralls
 
 ## Installing the Zulip Development environment
 
