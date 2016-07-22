@@ -338,6 +338,12 @@ MessageListView.prototype = {
                 });
             }
 
+	    row.find('.zulip-katex').each(function () {
+		disp = $(this).hasClass('zulip-katex-display');
+		katex.render(this.textContent, this, {throwOnError: false, displayMode: disp});
+		$(this).removeClass('zulip-katex');
+	    });
+
             var id = rows.id(row);
             message_edit.maybe_show_edit(row, id);
 
