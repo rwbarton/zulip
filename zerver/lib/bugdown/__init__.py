@@ -936,9 +936,9 @@ class Bugdown(markdown.Extension):
         md.preprocessors.add("custom_text_notifications", AlertWordsNotificationProcessor(md), "_end")
 
         # Custom bold syntax: **foo** but not __foo__
-        md.inlinePatterns.add('strong',
-            markdown.inlinepatterns.SimpleTagPattern(r'(\*\*)([^\n]+?)\2', 'strong'),
-            '>not_strong')
+        # md.inlinePatterns.add('strong',
+        #     markdown.inlinepatterns.SimpleTagPattern(r'(\*\*)([^\n]+?)\2', 'strong'),
+        #     '>not_strong')
 
         for k in ('hashheader', 'setextheader', 'olist', 'ulist'):
             del md.parser.blockprocessors[k]
